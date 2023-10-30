@@ -4,8 +4,8 @@ const fs = require("fs")
 const dirPath = path.join(__dirname, "../src/posts")
 let postList = []
 
-const getPosts = async () => {
-    await fs.readdir(dirPath, (err, files) => {
+const getPosts = () => {
+    fs.readdir(dirPath, (err, files) => {
         if (err) {
             return console.log("🚨 Failed to list contents of directory" + err)
         }
@@ -45,21 +45,24 @@ const getPosts = async () => {
                 const metadataIndices = lines.reduce(getMetadataIndices, [])
                 const metadata = parseMetadata({lines, metadataIndices})
                 const content = parseContent({lines, metadataIndices})
-                console.log("🥎", content)
+
                 const post = {
                     id: i + 1,
                     title: metadata.title ? metadata.title : "No title given",
                     date: metadata.date ? metadata.date : "No date given",
                     content: content ? content : "No content given"
                 }
+
                 postList.push(post)
+
+                if (i === files.length - 1) {
+                    let data = JSON.stringify(postList)
+                    fs.writeFileSync("src/posts.json", data)
+                }
             })
         })
     })
-
-    setTimeout(() => {
-        console.log(postList)
-    }, 500)
+    return
 }
 
 getPosts()
